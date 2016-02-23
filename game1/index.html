@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>First JavaScript Game by Jani Makinen</title>
+</head>
+<body>
+
+<center>
+
+<canvas id="renderSurface">
+</canvas>
+
+<script type="text/javascript">
+
+var canvas = document.getElementById("renderSurface");
+var ctx = canvas.getContext("2d");
+canvas.width = 320;
+canvas.height = 240;
+canvas.style = "background:white";
+
+var Game = { };
+Game.isRunning = false;
+Game.isShuttingDown = false;
+
+var Player = { };
+Player.position = {};
+Player.position.x = 0;
+Player.position.y = 0;
+Player.movespeed = 10;
+
+window.addEventListener("keydown", this.keyPressed, false);
+
+function keyPressed(e) {
+    var keycode = e.keyCode;
+    switch (keycode) {
+
+        case 37: Player.position.x -= Player.movespeed; break;//left
+        case 39: Player.position.x += Player.movespeed; break;//right
+
+        case 38: Player.position.y -= Player.movespeed; break;//up
+        case 40: Player.position.y += Player.movespeed; break;//down
+
+        default: 
+            Game.isShuttingDown = true;
+        break;
+    }
+}
+
+Game.fps = 50;
+
+Game.updateLogic = function()
+{
+    console.log("should probably do something regarding to game logic..");
+}
+
+Game.updateVisuals = function()
+{
+    if ( Game.isShuttingDown == true )
+    {
+        ctx.clearRect(0, 0, 320, 240);
+        ctx.font = "20px Georgia";
+        ctx.fillStyle = "#000000";
+        ctx.fillText("Game Over Refresh Browser Please!",10,50);
+        ctx.stroke();
+        clearInterval(Game.updateIntervalID);
+        return;
+        
+    } else {
+
+    ctx.clearRect(0, 0, ctx.width, ctx.height);
+    //TODO: Fancy colors..
+    //ctx.fillStyle = "#0000ff";
+    ctx.rect( Player.position.x,Player.position.y,10,10);
+    ctx.stroke();
+    }
+}
+
+Game.update = function() {
+  Game.updateLogic();
+  Game.updateVisuals();
+};
+
+Game.updateIntervalID = setInterval(Game.update, 1000 / Game.fps);
+
+</script>
+
+</body>
+</html>
