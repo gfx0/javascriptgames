@@ -1,0 +1,133 @@
+<html>
+<head>
+<title>First JavaScript Game by Jani Makinen</title>
+</head>
+<body>
+
+<center>
+
+<canvas id="renderSurface">
+</canvas>
+
+<script type="text/javascript">
+
+// Create the image object
+var playerImage = new Image();
+
+var imagesLoaded = false;
+
+var canvas = document.getElementById("renderSurface");
+var ctx = canvas.getContext("2d");
+canvas.width = 320;
+canvas.height = 240;
+canvas.style = "background:white";
+
+var Game = { };
+Game.isRunning = false;
+Game.isShuttingDown = false;
+
+var Player = { };
+Player.position = {};
+Player.position.x = 0;
+Player.position.y = 0;
+Player.movespeed = 2;
+Player.isMovingUp = false;
+Player.isMovingDown = false;
+Player.isMovingLeft = false;
+Player.isMovingRight = false;
+
+window.addEventListener("keydown", this.keyDown, false);
+window.addEventListener("keyup", this.keyUp, false);
+
+function keyDown(e) {
+    var keycode = e.keyCode;
+    switch (keycode) {
+        case 37: Player.isMovingLeft = true; break;
+        case 39: Player.isMovingRight = true; break;
+        case 38: Player.isMovingUp = true; break;
+        case 40: Player.isMovingDown = true; break;
+        
+        case 27: //escape
+        //alert(keycode);
+        break;
+    }
+}
+function keyUp(e) {
+    var keycode = e.keyCode;
+    switch (keycode) {
+        case 37: Player.isMovingLeft = false; break;
+        case 39: Player.isMovingRight = false; break;
+        case 38: Player.isMovingUp = false; break;
+        case 40: Player.isMovingDown = false; break;
+
+        case 27: //escape
+            Game.isShuttingDown = true;
+        break;
+    }
+}
+Game.fps = 50;
+
+Game.updateLogic = function()
+{
+    console.log("should probably do something regarding to game logic..");
+
+    if ( Player.isMovingUp )
+        Player.position.y -= Player.movespeed;
+
+    if ( Player.isMovingDown )
+        Player.position.y += Player.movespeed;
+
+    if ( Player.isMovingLeft )
+        Player.position.x -= Player.movespeed;
+
+    if ( Player.isMovingRight )
+        Player.position.x += Player.movespeed;
+        
+}
+
+var flipper = false;
+
+Game.updateVisuals = function()
+{
+    if ( Game.isShuttingDown == true )
+    {
+        ctx.clearRect(0, 0, 320, 240);
+        ctx.font = "20px Georgia";
+        ctx.fillStyle = "#000000";
+        ctx.fillText("Game Over Refresh Browser Please!",10,50);
+        
+        clearInterval(Game.updateIntervalID);
+        return;
+        
+    } else {
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(playerImage, Player.position.x,Player.position.y);
+    //ctx.stroke();
+    //ctx.save();
+    //ctx.restore();
+    }
+}
+
+Game.update = function() {
+  Game.updateLogic();
+  Game.updateVisuals();
+};
+
+Game.updateIntervalID = setInterval(Game.update, 1000 / Game.fps);
+
+
+ 
+// Add onload event handler
+playerImage.onload = function () {
+    // Done loading, now we can use the image
+    imagesLoaded = true;
+};
+
+// Set the source url of the image
+playerImage.src = "superhero.png";
+
+</script>
+
+</body>
+</html>
