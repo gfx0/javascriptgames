@@ -1,0 +1,288 @@
+<html>
+<head>
+<title>First JavaScript Game by Jani Makinen</title>
+</head>
+<body>
+
+<center>
+
+<canvas id="renderSurface">
+</canvas>
+
+<script type="text/javascript">
+
+//Load images crudely, TODO: create preloader.
+var playerImage = new Image();
+var grassImage = new Image();
+var waterImage = new Image();
+
+var imagesLoaded = false;
+
+playerImage.onload = function()
+{ 
+    imagesLoaded = true;
+};
+
+playerImage.onerror = function()
+{
+
+};
+
+var grassImage = new Image();
+
+grassImage.onload = function()
+{ 
+    
+};
+grassImage.onerror = function()
+{
+
+};
+
+var waterImage = new Image();
+
+waterImage.onload = function()
+{ 
+    
+};
+waterImage.onerror = function()
+{
+
+};
+
+waterImage.src = './images/water.png';
+grassImage.src = './images/grass.png';
+playerImage.src = './images/player.png';
+
+/********************************************************
+ *
+ * TILEMAP CREATION
+ *
+ ********************************************************/
+var tileMap = [];
+
+var tiles = [ 0, 1 ];//todo: Enumerator
+
+var tileSize = 32;//px
+
+// Creates the tile map
+function initializeTileMap()
+{
+    //row [0]
+    for ( var row = 0; row < canvas.height/tileSize; row++ )
+    {
+        tileMap.push( [] ); //stupid javascript syntax.
+
+        //col [0]
+        for ( var col = 0; col < canvas.width/tileSize; col++ )
+        {
+            tileMap[row].push(0);
+        }
+
+    }
+
+}
+
+function randomizeTileMap()
+{
+    for ( var row = 0; row < canvas.height/tileSize; row++ )
+    {
+        for ( var col = 0; col < canvas.width/tileSize; col++ )
+        {
+            tileMap[row][col] = Math.floor((Math.random() * tiles.length) );
+            //debug//console.log("result: "+result+"\n");
+        }
+    }
+}
+
+function renderTileMap()
+{
+    for ( var row = 0; row < canvas.height/tileSize; row++ )
+    {
+        for ( var col = 0; col < canvas.width/tileSize; col++ )
+        {
+            if ( tileMap[row][col] == 0 )
+            {
+                ctx.drawImage(grassImage, col*tileSize,row*tileSize); 
+            } 
+            else
+            {
+                ctx.drawImage(waterImage, col*tileSize,row*tileSize); 
+            }
+        }
+    }
+
+}
+
+var canvas = document.getElementById("renderSurface");
+var ctx = canvas.getContext("2d");
+canvas.width = 6 * tileSize;
+canvas.height = 6 * tileSize;
+canvas.style = "background:white";
+
+var Game = { };
+Game.isRunning = false;
+Game.isShuttingDown = false;
+
+var Player = { };
+Player.position = {};
+Player.position.x = 0;
+Player.position.y = 0;
+Player.movespeed = 4;
+Player.isMovingUp = false;
+Player.isMovingDown = false;
+Player.isMovingLeft = false;
+Player.isMovingRight = false;
+
+window.addEventListener("keydown", this.keyDown, false);
+window.addEventListener("keyup", this.keyUp, false);
+
+function keyDown(e) {
+    var keycode = e.keyCode;
+    switch (keycode) {
+        case 37: Player.isMovingLeft = true; break;
+        case 39: Player.isMovingRight = true; break;
+        case 38: Player.isMovingUp = true; break;
+        case 40: Player.isMovingDown = true; break;
+
+        //case 32: initializeTileMap(); break;
+        case 32: randomizeTileMap(); break;
+        case 27: //escape
+        //alert(keycode);
+        break;
+    }
+}
+function keyUp(e) {
+    var keycode = e.keyCode;
+    switch (keycode) {
+        case 37: Player.isMovingLeft = false; break;
+        case 39: Player.isMovingRight = false; break;
+        case 38: Player.isMovingUp = false; break;
+        case 40: Player.isMovingDown = false; break;
+
+        case 27: //escape
+            Game.isShuttingDown = true;
+        break;
+    }
+}
+Game.fps = 50;
+
+var cachedPosition = 0;
+cachedPosition.x = 0;
+cachedPosition.y = 0;
+
+function canWalkOnTile(posX, posY)
+{
+    if ( posX < 0 || posX > canvas.width-tileSize)
+        return false;
+
+    if ( posY < 0 || posY > canvas.height-tileSize)
+        return false;
+    //does tileposition x y contain tileMap[slot] 1 ?
+    //if so, return false;
+    console.log("inspecting vs x:"+posX+" y:"+posY);
+    for ( var row = 0; row < canvas.height/tileSize; row++ )
+    {
+        //y = 74
+        //row = 2*32 = 64
+        //newrow -> 86
+        if ( posY >= row*32 && posY <= (row+1)*32 )
+        {
+            //console.log("found right row at index: "+row);
+            for ( var col = 0; col < canvas.width/tileSize; col++ )
+            {
+
+                if ( posX >= col*32 && posX <= (col+1)*32 )
+                {
+                    //console.log("found right col at index: "+col);
+                    if ( tileMap[row][col] == 1 )
+                    {
+                        console.log("tried walking on water, not allowed!");
+                       // return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+Game.updateLogic = function()
+{
+
+    var moveWishedOnX = 0;
+    var moveWishedOnY = 0;
+
+    if ( Player.isMovingUp )
+        moveWishedOnY -= Player.movespeed;
+
+    if ( Player.isMovingDown )
+        moveWishedOnY += Player.movespeed;
+
+    if ( Player.isMovingLeft )
+        moveWishedOnX -= Player.movespeed;
+
+    if ( Player.isMovingRight )
+        moveWishedOnX += Player.movespeed;
+
+    if ( canWalkOnTile( Player.position.x + moveWishedOnX,
+                        Player.position.y + moveWishedOnY) )
+    {
+        Player.position.x += moveWishedOnX;
+        Player.position.y += moveWishedOnY;
+    }
+
+    console.log("x: "+Player.position.x+" y:"+Player.position.y);
+
+}
+
+var flipper = false;
+var fps = 0;
+
+Game.updateVisuals = function()
+{
+    if ( Game.isShuttingDown == true )
+    {
+        ctx.fillText("Game Over Refresh Browser Please!",10,50);
+        clearInterval(Game.updateIntervalID);
+        return;        
+    } else {
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    renderTileMap();
+
+    ctx.drawImage(playerImage, Player.position.x,Player.position.y);
+
+    //ctx.fillText("FPS:"+fps,5,10);
+    //ctx.stroke();
+    //ctx.save();
+    //ctx.restore();
+    }
+}
+
+
+Game.update = function() {
+  Game.updateLogic();
+  Game.updateVisuals();
+};
+
+
+function main()
+{
+    //randomize image positions
+    initializeTileMap();
+    randomizeTileMap();
+
+    ctx.font = "12px System";
+    ctx.fillStyle = "#FFFFFF";
+    Game.updateIntervalID = setInterval(Game.update, 1000 / Game.fps);
+}
+
+main();
+
+</script>
+
+</body>
+</html>
