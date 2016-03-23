@@ -231,6 +231,7 @@ function keyUp(e) {
     }
 }
 
+var debugIsOverXPos = false;
 
 function canWalkOnTile(posX, posY)
 {
@@ -250,9 +251,39 @@ function canWalkOnTile(posX, posY)
 
     */
 
-    console.log("pPosX: "+posX+" pPosY: "+posY);
-    console.log("tPosX: "+(0+2)*32+" tPosY: "+(0+2)*32);
+    //console.log("pPosX: "+posX+" pPosY: "+posY);
+    //console.log("tPosX: "+(0+2)*32+" tPosY: "+(0+2)*32);
 
+
+    var tmapPosX = (0+2)*32; // 64
+    var tmapPosY = (0+2)*32; // 64
+    var tmapPosXMid = tmapPosX + tileSize/2; //64 - (32/2) = 64 - 16 = 48
+    var tmapPosYMid = tmapPosY + tileSize/2; //64 - (32/2) = 64 - 16 = 48
+
+    var playerPosXMid = posX + tileSize/2;
+    var playerPosYMid = posY + tileSize/2;
+
+
+    if ( posX > tileSize*2 )
+    {
+        debugIsOverXPos = true;
+    }
+    else
+    {
+        debugIsOverXPos = false;
+    }
+    //
+    //  x x x x x
+    //
+    //  x x x x x
+    //
+    //  x x x x x
+    //
+
+    //if ( tmapPosXMid > )
+    
+
+    //if ( )
     
 
     //does tileposition x y contain tileMap[slot] 1 ?
@@ -346,6 +377,16 @@ Game.updateVisuals = function()
 
     if ( showDebugVisualizations )
     {
+
+        if ( debugIsOverXPos )
+            ctx.fillStyle = "#00ff00";//green
+        else
+            ctx.fillStyle = "#ff0000";//red
+        //ctx.fillStyle = "#ff00ff";
+        var posX = Player.position.x;
+        var posY = Player.position.y;
+        ctx.fillText("x"+posX+" y"+posY,posX,posY+tileSize/2);
+        //canvas.fillStyle = "#ff00ff";
         ctx.beginPath();
         ctx.moveTo(0,0);
         ctx.lineTo(Player.position.x+tileSize/2,Player.position.y+tileSize/2);
